@@ -150,7 +150,6 @@ def make_ogbench_env_and_datasets(
     from envs.env_utils import (
         EpisodeMonitor,
         RewardWrapper,
-        maybe_wrap_mujoco_fatal_error,
         transform_dataset_rewards,
     )
     from utils.datasets import Dataset
@@ -167,10 +166,8 @@ def make_ogbench_env_and_datasets(
             splits[: pos - 1] + splits[pos:]
         )  # Remove the dataset type.
         if not dataset_only:
-            env = maybe_wrap_mujoco_fatal_error(gymnasium.make(env_name, **env_kwargs))
-            eval_env = maybe_wrap_mujoco_fatal_error(
-                gymnasium.make(env_name, **env_kwargs)
-            )
+            env = gymnasium.make(env_name, **env_kwargs)
+            eval_env = gymnasium.make(env_name, **env_kwargs)
         dataset_name = "-".join(
             splits[:pos] + splits[-1:]
         )  # Remove the words 'singletask' and 'task\d' (if exists).
@@ -181,9 +178,7 @@ def make_ogbench_env_and_datasets(
             splits[:-3] + splits[-1:]
         )  # Remove the dataset type and the word 'oraclerep'.
         if not dataset_only:
-            env = maybe_wrap_mujoco_fatal_error(
-                gymnasium.make(env_name, use_oracle_rep=True, **env_kwargs)
-            )
+            env = gymnasium.make(env_name, use_oracle_rep=True, **env_kwargs)
         dataset_name = "-".join(
             splits[:-2] + splits[-1:]
         )  # Remove the word 'oraclerep'.
@@ -192,7 +187,7 @@ def make_ogbench_env_and_datasets(
         # Original, goal-conditioned environment.
         env_name = "-".join(splits[:-2] + splits[-1:])  # Remove the dataset type.
         if not dataset_only:
-            env = maybe_wrap_mujoco_fatal_error(gymnasium.make(env_name, **env_kwargs))
+            env = gymnasium.make(env_name, **env_kwargs)
 
     if env_only:
         return env

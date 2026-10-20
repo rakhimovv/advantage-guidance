@@ -6,12 +6,10 @@ Keep these defaults here rather than exposing or repeating them in experiment la
 """
 
 import collections
-import copy
 import re
 import time
 
 import gymnasium
-import mujoco
 import numpy as np
 import ogbench
 from gymnasium.spaces import Box
@@ -19,87 +17,6 @@ from utils.datasets import Dataset, sparsify_dataset
 
 OCBENCH_ACTION_NORM_PERCENTILE = 1.0
 OCBENCH_ACTION_NORM_CLIP = 5.0
-
-
-class MuJoCoFatalErrorWrapper(gymnasium.Wrapper):
-    """Recover from `mujoco.FatalError` raised out of `reset` or `step`.
-
-    Some OGBench poses blow up the narrowphase collision check (e.g. "collision function
-    returned 9 contacts ... expected at most 8"), which surfaces as a `mujoco.FatalError`.
-
-    On `reset` the pose is resampled, which is enough to recover. On `step` there is
-    nothing to resample: the simulator aborted mid-update, so the physics state is
-    undefined and replaying the same action reproduces the blow-up. We end the episode
-    instead (truncated, with the last valid observation and info), which makes the caller
-    reset and reinitialize `MjData` from scratch.
-
-    An episode killed this way is not a policy failure, it is an invalid episode -- the
-    step info is tagged with `mujoco_fatal=True` so evaluation can discard and re-roll it
-    rather than score it.
-    """
-
-    FATAL_INFO_KEY = "mujoco_fatal"
-
-    def __init__(self, env, max_retries=32):
-        super().__init__(env)
-        self._max_retries = max_retries
-        self._last_observation = None
-        self._last_info = None
-
-    def reset(self, *, seed=None, options=None, **kwargs):
-        last_error = None
-        for attempt in range(self._max_retries + 1):
-            # Pass the caller's seed through untouched on the first attempt: eval resets
-            # with seed=None and must keep drawing from the env RNG stream, otherwise
-            # every episode would start from the same state. Only retries perturb it,
-            # since replaying an explicit seed would reproduce the same bad pose.
-            if attempt == 0 or seed is None:
-                retry_seed = seed
-            else:
-                retry_seed = seed + attempt
-            try:
-                observation, info = self.env.reset(
-                    seed=retry_seed, options=options, **kwargs
-                )
-            except mujoco.FatalError as error:
-                last_error = error
-                if attempt < self._max_retries:
-                    print(
-                        f"MuJoCo reset failed ({error}); retrying ({attempt + 1}/{self._max_retries})."
-                    )
-                continue
-            self._last_observation = observation
-            self._last_info = info
-            return observation, info
-        raise last_error
-
-    def step(self, action):
-        try:
-            observation, reward, terminated, truncated, info = self.env.step(action)
-        except mujoco.FatalError as error:
-            print(f"MuJoCo step failed ({error}); ending the episode as invalid.")
-            # Keep the info payload of the last good step so that downstream consumers
-            # that expect the env's step keys (`success`, task keys) still find them.
-            info = copy.deepcopy(self._last_info) if self._last_info else {}
-            info[self.FATAL_INFO_KEY] = True
-            return self._last_observation, 0.0, False, True, info
-        self._last_observation = observation
-        self._last_info = info
-        return observation, reward, terminated, truncated, info
-
-
-def maybe_wrap_mujoco_fatal_error(env, max_retries=32):
-    """Wrap `env` in MuJoCoFatalErrorWrapper if it is a MuJoCo env, else return it as is."""
-    if env is None:
-        return None
-    unwrapped = env.unwrapped
-    is_mujoco = any(
-        isinstance(getattr(unwrapped, attr, None), mujoco.MjModel)
-        for attr in ("model", "_model")
-    )
-    if is_mujoco:
-        return MuJoCoFatalErrorWrapper(env, max_retries=max_retries)
-    return env
 
 
 class EpisodeMonitor(gymnasium.Wrapper):
@@ -236,7 +153,7 @@ def make_env_and_datasets(
     if eval_env_only and "singletask" in env_name:
         # OGBench eval env only
         eval_env = ogbench.make_env_and_datasets(env_name, env_only=True)
-        eval_env = EpisodeMonitor(maybe_wrap_mujoco_fatal_error(eval_env))
+        eval_env = EpisodeMonitor(eval_env)
         if frame_stack is not None:
             eval_env = FrameStackWrapper(eval_env, frame_stack)
         if reward_scale != 1.0 or reward_bias != 0.0:
@@ -247,8 +164,6 @@ def make_env_and_datasets(
         # OGBench.
         env, train_dataset, val_dataset = ogbench.make_env_and_datasets(env_name)
         eval_env = ogbench.make_env_and_datasets(env_name, env_only=True)
-        env = maybe_wrap_mujoco_fatal_error(env)
-        eval_env = maybe_wrap_mujoco_fatal_error(eval_env)
         env = EpisodeMonitor(env, filter_regexes=[".*privileged.*", ".*proprio.*"])
         eval_env = EpisodeMonitor(
             eval_env, filter_regexes=[".*privileged.*", ".*proprio.*"]

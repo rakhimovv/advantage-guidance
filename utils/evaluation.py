@@ -7,11 +7,6 @@ from typing import List
 import jax
 import numpy as np
 import tqdm
-from envs.env_utils import MuJoCoFatalErrorWrapper
-
-# An episode whose physics blew up is invalid, not failed: it is re-rolled from a fresh
-# reset. Cap the re-rolls per sub-env so a pathological env cannot spin forever.
-MAX_FATAL_RESTARTS = 10
 
 
 def supply_rng(f, rng=jax.random.PRNGKey(0)):
@@ -239,24 +234,6 @@ def run_episodes(
     # Per-env action queues for action chunking (H > 1).
     action_queues = [[] for _ in range(num_envs)]
 
-    # Number of episodes discarded so far per sub-env because MuJoCo blew up mid-episode.
-    fatal_restarts = np.zeros(num_envs, dtype=np.int32)
-    is_vector_env = not isinstance(env, SingleEnvBatchAdapter)
-
-    def restart_episode(idx, autoreset_observation):
-        """Throw away sub-env `idx`'s partial episode and start a fresh one in its place."""
-        trajectories[idx] = defaultdict(list)
-        renders[idx] = []
-        returns[idx] = 0.0
-        lengths[idx] = 0
-        action_queues[idx] = []
-        if is_vector_env:
-            # Gymnasium vector envs already auto-reset the sub-env, so the step's
-            # observation is the new episode's initial one.
-            return autoreset_observation
-        fresh_observation, _ = env.reset(options=dict(task_id=task_id))
-        return fresh_observation[0]
-
     while not np.all(~active):
         # Determine which envs need a new action chunk.
         # Keep stepping inactive vector sub-envs too. Gymnasium vector envs
@@ -310,29 +287,6 @@ def run_episodes(
                         next_observation = info["final_observation"]
                     if "final_info" in info:
                         info = copy.deepcopy(info["final_info"])
-
-                if done_now[idx] and info.get(
-                    MuJoCoFatalErrorWrapper.FATAL_INFO_KEY, False
-                ):
-                    # The simulator aborted, so this episode never really happened.
-                    # Scoring it would count a physics bug as a policy failure; drop it
-                    # and roll a replacement so the caller still gets a full batch of
-                    # valid episodes.
-                    fatal_restarts[idx] += 1
-                    if fatal_restarts[idx] <= MAX_FATAL_RESTARTS:
-                        print(
-                            f"Discarding episode from env {idx} (MuJoCo blew up mid-episode); "
-                            f"re-rolling it ({fatal_restarts[idx]}/{MAX_FATAL_RESTARTS})."
-                        )
-                        observations[idx] = np.asarray(
-                            restart_episode(idx, next_observations[idx])
-                        ).reshape(-1)
-                        continue
-                    raise RuntimeError(
-                        f"env {idx} hit a MuJoCo fatal error in {MAX_FATAL_RESTARTS + 1} "
-                        f"episodes of a single eval batch. Refusing to report metrics "
-                        f"built from invalid episodes."
-                    )
 
                 transition = dict(
                     observation=observations[idx],

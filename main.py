@@ -17,10 +17,7 @@ import tqdm
 import wandb
 from absl import app, flags
 from agents import agents
-from envs.env_utils import (
-    MuJoCoFatalErrorWrapper,
-    make_env_and_datasets,
-)
+from envs.env_utils import make_env_and_datasets
 from envs.ocbench_utils import (
     fit_action_normalizer,
     is_ocbench_env_name,
@@ -558,19 +555,16 @@ def main(_):
             if FLAGS.sparse:
                 reward = _remap_sparse_env_reward(reward)
 
-            # A step MuJoCo aborted has no real next state (see MuJoCoFatalErrorWrapper),
-            # so it would poison the buffer with a zero-reward self-transition.
-            if not info.get(MuJoCoFatalErrorWrapper.FATAL_INFO_KEY, False):
-                replay_buffer.add_transition(
-                    dict(
-                        observations=ob,
-                        actions=action,
-                        rewards=reward,
-                        terminals=float(done),
-                        masks=1.0 - terminated,
-                        next_observations=next_ob,
-                    )
+            replay_buffer.add_transition(
+                dict(
+                    observations=ob,
+                    actions=action,
+                    rewards=reward,
+                    terminals=float(done),
+                    masks=1.0 - terminated,
+                    next_observations=next_ob,
                 )
+            )
             ob = next_ob
 
             if done:

@@ -44,8 +44,7 @@ The paper experiments use simulated environments from [OGBench](https://github.c
 
 ### OGBench
 
-The paper uses `cube-single`, `cube-double`, `scene`, and `puzzle-3x3`, with tasks 1–5  
-for each family. The default 1M datasets will be automatically downloaded to `~/.ogbench/data`. Sparse rewards are enabled by default. There is no need to set `--ogbench_dataset_dir`, which is only used for local sharded datasets (e.g. the 100M datasets).
+The paper uses `cube-single`, `cube-double`, `scene`, and `puzzle-3x3`, with tasks 1–5 for each family. The default 1M datasets will be automatically downloaded to `~/.ogbench/data`. Sparse rewards are enabled by default. There is no need to set `--ogbench_dataset_dir`, which is only used for local sharded datasets (e.g. the 100M datasets).
 
 ### OCBench
 
@@ -74,17 +73,11 @@ MUJOCO_GL=egl uv run python main.py \
   --eval_vecenv_size=10 \
 ```
 
-The `--guidance_weights` flag evaluates every listed weight at each evaluation interval and logs a separate success rate for  
-each. Checkpoints are saved to  
-`exp/advantage-guidance/<wandb_run_group>/<run_name>/params_<step>.pkl`, alongside CSV  
-logs.
+The `--env_name` values used in the paper are `cube-single-play-singletask-task<1-5>-v0`, `cube-double-play-singletask-task<1-5>-v0`, `scene-play-singletask-task<1-5>-v0`, `puzzle-3x3-play-singletask-task<1-5>-v0`, `block-lite-single-task1-v0`, `block-lite-double-task<1-2>-v0`, and `chamber-lite-easy-task<1-3>-v0`. The `--guidance_weights` flag evaluates every listed weight at each evaluation interval and logs a separate success rate for each. Checkpoints are saved to  `exp/advantage-guidance/<wandb_run_group>/<run_name>/params_<step>.pkl`, alongside CSV logs.
 
 ## Launching full paper experiments (via SLURM)
 
-Each `scripts/exp_*.py` writes a submission wrapper to `sbatch/`. Run the wrapper with
-`bash` to submit its SLURM array. The workers use
-[GNU parallel](https://www.gnu.org/software/parallel/), so install it on your cluster.
-Run these commands from the repository root with the environment installed above.
+Each `scripts/exp_*.py` writes a submission wrapper to `sbatch/`. Run the wrapper with `bash` to submit its SLURM array. The workers use [GNU parallel](https://www.gnu.org/software/parallel/), so install it on your cluster. Run these commands from the repository root with the environment installed above.
 
 ### Advantage Guidance
 

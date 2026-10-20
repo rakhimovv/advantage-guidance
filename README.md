@@ -1,14 +1,23 @@
--
 
-# Reinforcement Learning via Advantage Guidance
+<div align="center">
 
-## [[Paper]](https://arxiv.org/abs/2610.19783)   [[Website]](https://advantage-guidance.github.io/)
+<div id="user-content-toc" style="margin-bottom: 50px">
+  <ul align="center" style="list-style: none;">
+    <summary>
+      <h1>Reinforcement Learning via Advantage Guidance</h1>
+      <br>
+      <h2><a href="https://arxiv.org/abs/2610.19783" style="color: #73A4C6">[Paper]</a> &emsp; <a href="https://advantage-guidance.github.io/" style="color: #73A4C6">[Website]</a></h2>
+    </summary>
+  </ul>
+</div>
+
+</div>
 
 ![Advantage Guidance overview and benchmark results](assets/teaser.svg)
 
 ## Overview
 
-Advantage Guidance (AG) a new off-policy RL algorithm that trains with a **simple supervised learning loss** conditioned on advantages, yet **outperforms** strong RL methods. The key is to make the policy genuinely responsive to advantage conditioning, then use contrastive diffusion guidance at sampling time for advantage maximization. 
+Advantage Guidance (AG) an off-policy RL algorithm that trains with a **simple supervised learning loss** conditioned on advantages, yet **outperforms** strong RL methods. The key is to make the policy genuinely responsive to advantage conditioning, then use contrastive diffusion guidance at sampling time for advantage maximization. 
 
 This repository contains AG and the baselines used in our OGBench and OCBench comparison. The implementation is in [`agents/advantage_guidance.py`](agents/advantage_guidance.py).
 

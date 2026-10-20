@@ -71,7 +71,7 @@ def hop_backward(
         task,
         time_limit=time_limit,
         control_timestep=_CONTROL_TIMESTEP,
-        **environment_kwargs
+        **environment_kwargs,
     )
 
 
@@ -86,7 +86,7 @@ def flip(time_limit: int = _DEFAULT_TIME_LIMIT, random=None, environment_kwargs=
         task,
         time_limit=time_limit,
         control_timestep=_CONTROL_TIMESTEP,
-        **environment_kwargs
+        **environment_kwargs,
     )
 
 
@@ -103,7 +103,7 @@ def flip_backward(
         task,
         time_limit=time_limit,
         control_timestep=_CONTROL_TIMESTEP,
-        **environment_kwargs
+        **environment_kwargs,
     )
 
 

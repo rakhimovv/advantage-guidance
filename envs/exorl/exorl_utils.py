@@ -4,7 +4,6 @@ import glob
 import os
 import pickle
 from collections import defaultdict
-from pathlib import Path
 
 import numpy as np
 import tqdm
@@ -64,7 +63,6 @@ def get_dataset(env, env_name, method="rnd", use_task_reward=True, **kwargs):
             if use_task_reward:
                 # TODO: make this faster and sanity check it
                 rewards = []
-                pixels = []
                 reward_spec = env.reward_spec()
                 states = traj_data["physics"]
                 for j in range(states.shape[0]):

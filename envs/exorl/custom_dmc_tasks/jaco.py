@@ -101,7 +101,6 @@ class MultiTaskReach(composer.Task):
             self._targets = [target for (task, target) in TASKS if task == task_id]
             assert len(self._targets) > 0
 
-        # target_pos_distribution = distributions.Uniform(*TASKS[task_id])
         self._prop = prop
         if prop:
             # The prop itself is used to visualize the target location.
@@ -109,7 +108,7 @@ class MultiTaskReach(composer.Task):
             self._target = self._arena.add_free_entity(prop)
             self._prop_placer = initializers.PropPlacer(
                 props=[prop],
-                position=target_pos_distribution,
+                position=distributions.Uniform(*workspace.target_bbox),
                 quaternion=workspaces.uniform_z_rotation,
                 settle_physics=True,
             )

@@ -8,7 +8,7 @@ import jax.numpy as jnp
 import ml_collections
 import optax
 from utils.flax_utils import ModuleDict, TrainState, expectile_loss, nonpytree_field
-from utils.networks import MLP_CLASSES, MLP, ActorFlowField, LogParam, Value
+from utils.networks import MLP_CLASSES, ActorFlowField, Value
 
 
 class QAMAgent(flax.struct.PyTreeNode):
@@ -263,7 +263,7 @@ class QAMAgent(flax.struct.PyTreeNode):
 
             # FQL loss.
             os_actions = jnp.clip(os_actions, -1, 1)
-            fql_qs = self.network.select(f"critic")(
+            fql_qs = self.network.select("critic")(
                 batch["observations"], actions=os_actions
             )
             fql_q = jnp.mean(fql_qs, axis=0)
@@ -293,7 +293,7 @@ class QAMAgent(flax.struct.PyTreeNode):
 
             # Edit policy loss.
             edited_actions = jnp.clip(edited_actions, -1, 1)
-            qs = self.network.select(f"critic")(
+            qs = self.network.select("critic")(
                 batch["observations"], actions=edited_actions
             )
             q = jnp.mean(qs, axis=0)

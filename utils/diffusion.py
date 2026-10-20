@@ -2,7 +2,7 @@
 
 Adapted from ~/repos/qam/utils/diffusion.py.
 """
-from functools import partial
+
 from typing import Type
 
 import flax.linen as nn

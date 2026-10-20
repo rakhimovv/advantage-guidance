@@ -1,5 +1,4 @@
 import math
-from functools import partial
 from typing import Any
 
 import flax
@@ -165,7 +164,7 @@ class BCAgent(flax.struct.PyTreeNode):
         # Get activation function
         try:
             activation_fn = getattr(nn, config["activation"])
-        except:
+        except (AttributeError, KeyError, TypeError):
             activation_fn = nn.gelu
 
         # Create flow matching policy network

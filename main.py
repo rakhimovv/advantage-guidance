@@ -440,7 +440,7 @@ def main(_):
                 rejection_sampling=rejection_sampling,
                 action_normalizer=action_normalizer,
             )
-            
+
             if rejection_sampling > 1:
                 eval_metrics = {
                     f"best_of_{rejection_sampling}_{k}": v
@@ -632,10 +632,9 @@ def main(_):
             train_logger.log(train_metrics, step=i)
 
         # Evaluate agent.
-        if (
-            i <= FLAGS.offline_steps
-            and i % FLAGS.eval_interval == 0
-        ) or (i > FLAGS.offline_steps and i % FLAGS.online_eval_interval == 0):
+        if (i <= FLAGS.offline_steps and i % FLAGS.eval_interval == 0) or (
+            i > FLAGS.offline_steps and i % FLAGS.online_eval_interval == 0
+        ):
             for rejection_sampling in [int(float(x.strip())) for x in FLAGS.bfn_values]:
                 eval_metrics, renders = _evaluate_agent(
                     agent,

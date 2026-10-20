@@ -17,7 +17,7 @@
 
 ## Overview
 
-Advantage Guidance (AG) an off-policy RL algorithm that trains with a **simple supervised learning loss** conditioned on advantages, yet **outperforms** strong RL methods. The key is to make the policy genuinely responsive to advantage conditioning, then use contrastive diffusion guidance at sampling time for advantage maximization. 
+Advantage Guidance (AG) an off-policy RL algorithm that trains with a **simple supervised learning loss** conditioned on advantages, yet **outperforms** strong RL methods. The key is to make the policy genuinely responsive to advantage conditioning, then use contrastive diffusion guidance at sampling time for advantage maximization.
 
 This repository contains AG and the baselines used in our OGBench and OCBench comparison. The implementation is in [`agents/advantage_guidance.py`](agents/advantage_guidance.py).
 
@@ -40,7 +40,7 @@ pip install -r requirements.txt
 
 ## Environments and Datasets
 
-The paper experiments use simulated environments from [OGBench](https://github.com/seohongpark/ogbench) and [OCBench](https://github.com/seohongpark/ocbench). There are also other environment types supported under `envs/`, such as exorl, d4rl, and robomimic, though they are not used in the paper. 
+The paper experiments use simulated environments from [OGBench](https://github.com/seohongpark/ogbench) and [OCBench](https://github.com/seohongpark/ocbench). There are also other environment types supported under `envs/`, such as exorl, d4rl, and robomimic, though they are not used in the paper.
 
 ### OGBench
 
@@ -103,8 +103,8 @@ python scripts/exp_rcp_r.py --suite ogbench && bash sbatch/rcp_r_ogbench.sh
 python scripts/exp_crr.py --suite ogbench && bash sbatch/crr_ogbench.sh
 ```
 
-For OCBench, replace `--suite ogbench` with `--suite ocbench` and `_ogbench.sh` with  
-`_ocbench.sh`. 
+For OCBench, replace `--suite ogbench` with `--suite ocbench` and `_ogbench.sh` with
+`_ocbench.sh`.
 
 ## Acknowledgments
 

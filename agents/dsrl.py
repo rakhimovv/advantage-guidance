@@ -1,5 +1,4 @@
 import copy
-from functools import partial
 from typing import Any
 
 import flax
@@ -8,7 +7,7 @@ import jax.numpy as jnp
 import ml_collections
 import optax
 from utils.flax_utils import ModuleDict, TrainState, nonpytree_field
-from utils.networks import MLP, ActorFlowField, GaussianActor, LogParam, Value
+from utils.networks import ActorFlowField, GaussianActor, LogParam, Value
 
 
 class DSRLAgent(flax.struct.PyTreeNode):

@@ -115,7 +115,7 @@ class FlattenJacoObservationWrapper(EnvWrapper):
 
         for spec in wrapped_obs_spec.values():
             assert spec.dtype == np.float64
-            assert type(spec) == specs.Array
+            assert type(spec) is specs.Array
         dim = np.sum(
             np.fromiter(
                 (
@@ -408,10 +408,10 @@ def _spec_to_box(spec, dtype):
     def extract_min_max(s):
         assert s.dtype == np.float64 or s.dtype == np.float32
         dim = int(np.prod(s.shape))
-        if type(s) == specs.Array:
+        if type(s) is specs.Array:
             bound = np.inf * np.ones(dim, dtype=np.float32)
             return -bound, bound
-        elif type(s) == specs.BoundedArray:
+        elif type(s) is specs.BoundedArray:
             zeros = np.zeros(dim, dtype=np.float32)
             return s.minimum + zeros, s.maximum + zeros
 

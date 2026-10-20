@@ -380,4 +380,3 @@ def make_env_and_datasets(
     )
 
     return env, eval_env, train_dataset, val_dataset
-

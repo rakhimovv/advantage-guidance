@@ -97,7 +97,6 @@ def get_dataset(env, env_name):
 
     rm_dataset = h5py.File(dataset_path, "r")
     demos = list(rm_dataset["data"].keys())
-    num_demos = len(demos)
     inds = np.argsort([int(elem[5:]) for elem in demos])
     demos = [demos[i] for i in inds]
 

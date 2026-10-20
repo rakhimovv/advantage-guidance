@@ -45,36 +45,11 @@ The paper experiments use simulated environments from [OGBench](https://github.c
 ### OGBench
 
 The paper uses `cube-single`, `cube-double`, `scene`, and `puzzle-3x3`, with tasks 1–5  
-for each family. The default 1M datasets will be automatically downloaded to `~/.ogbench/data`. Sparse rewards are enabled by default. There is no need to set `--ogbench_dataset_dir`, which is only used for local sharded datasets.
+for each family. The default 1M datasets will be automatically downloaded to `~/.ogbench/data`. Sparse rewards are enabled by default. There is no need to set `--ogbench_dataset_dir`, which is only used for local sharded datasets (e.g. the 100M datasets).
 
 ### OCBench
 
-The paper uses lite environments `block-single`, `block-double`, and `chamber-easy`. Although OCBench's official`make_env_and_datasets()` API downloads datasets automatically, our training code loads local shards directly, so download the datasets before training:
-
-```bash
-export OCBENCH_DATA_DIR="$HOME/.cache/ocbench/datasets"
-uv run python - <<'PY'
-import os
-import ocbench
-
-tasks = {
-    "block-lite-single-task1-v0": 1,
-    "block-lite-double-task1-v0": 3,
-    "block-lite-double-task2-v0": 3,
-    "chamber-lite-easy-task1-v0": 1,
-    "chamber-lite-easy-task2-v0": 1,
-    "chamber-lite-easy-task3-v0": 1,
-}
-for env_name, num_shards in tasks.items():
-    ocbench.download_datasets(
-        env_name,
-        dataset_root=os.environ["OCBENCH_DATA_DIR"],
-        num_shards=num_shards,
-    )
-PY
-```
-
-The downloader saves files under `$OCBENCH_DATA_DIR/lite/<env_name>/`. Each shard contains 10k trajectories. Our experiment script below set`--sparse=False` to retain OCBench's original sparse 0/1 rewards.
+The paper uses lite environments `block-single`, `block-double`, and `chamber-easy`. Training automatically downloads datasets to `$XDG_CACHE_HOME/ocbench/datasets`, or `~/.cache/ocbench/datasets` when unset. Each shard contains 10k trajectories. Our experiments set `--sparse=False` to retain OCBench's original sparse 0/1 rewards.
 
 ## Running a single experiment
 
@@ -118,7 +93,7 @@ Run these commands from the repository root with the environment installed above
 # OGBench
 python scripts/exp_advantage_guidance.py --suite ogbench && bash sbatch/advantage_guidance_ogbench.sh
 
-# OCBench (download the datasets first, as described above)
+# OCBench
 python scripts/exp_advantage_guidance.py --suite ocbench && bash sbatch/advantage_guidance_ocbench.sh
 ```
 

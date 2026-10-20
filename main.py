@@ -120,9 +120,6 @@ flags.DEFINE_integer(
 )
 
 # OCBench flags
-flags.DEFINE_string(
-    "ocbench_dataset_dir", None, "Directory containing OCBench .npz dataset shards."
-)
 flags.DEFINE_integer(
     "ocbench_num_datasets",
     None,
@@ -174,11 +171,7 @@ def _setup_data(config):
     # Make offline datasets
     dataset_action_clip_eps = config.get("dataset_action_clip_eps", 1e-5)
     action_normalizer = None
-    if FLAGS.ocbench_dataset_dir is not None:
-        if not is_ocbench_env_name(FLAGS.env_name):
-            raise ValueError(
-                "--ocbench_dataset_dir requires an OCBench environment name such as block-lite-double-task1-v0."
-            )
+    if is_ocbench_env_name(FLAGS.env_name):
         if FLAGS.online_steps > 0:
             raise ValueError(
                 "Online fine-tuning is not yet supported for OCBench environments."
@@ -189,7 +182,7 @@ def _setup_data(config):
             )
         dataset_idx = 0
         dataset_paths = get_ocbench_dataset_paths(
-            FLAGS.ocbench_dataset_dir,
+            FLAGS.env_name,
             num_datasets=FLAGS.ocbench_num_datasets,
         )
         action_normalizer = fit_action_normalizer(dataset_paths[0])
@@ -489,7 +482,7 @@ def main(_):
             if (
                 (
                     FLAGS.ogbench_dataset_dir is not None
-                    or FLAGS.ocbench_dataset_dir is not None
+                    or is_ocbench_env_name(FLAGS.env_name)
                 )
                 and FLAGS.dataset_replace_interval != 0
                 and i % FLAGS.dataset_replace_interval == 0
@@ -504,7 +497,7 @@ def main(_):
                 train_dataset = None
                 gc.collect()
 
-                if FLAGS.ocbench_dataset_dir is not None:
+                if is_ocbench_env_name(FLAGS.env_name):
                     train_dataset, _ = load_ocbench_dataset(
                         dataset_paths[dataset_idx],
                         action_normalizer=action_normalizer,

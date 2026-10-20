@@ -2,7 +2,6 @@
 
 import argparse
 import itertools
-import os
 import sys
 from pathlib import Path
 
@@ -64,14 +63,12 @@ def ogbench_configs():
         yield config
 
 
-def ocbench_configs(dataset_root):
+def ocbench_configs():
     for env_name, shards in OCBENCH_TASKS:
-        dataset_dir = dataset_root / "lite" / env_name
         for seed in range(1, 11):
             config = {
                 "env_name": env_name,
                 "seed": seed,
-                "ocbench_dataset_dir": str(dataset_dir),
                 "ocbench_num_datasets": shards,
                 # Keep OCBench's original sparse 0/1 rewards.
                 "sparse": False,
@@ -85,18 +82,8 @@ def ocbench_configs(dataset_root):
             yield config
 
 
-def build_generator(get_config, suite, run_group, *, dataset_root=None, debug=False):
-    dataset_root = (
-        Path(
-            dataset_root
-            or os.environ.get("OCBENCH_DATA_DIR", "~/.cache/ocbench/datasets")
-        )
-        .expanduser()
-        .resolve()
-    )
-    configs = list(
-        ogbench_configs() if suite == "ogbench" else ocbench_configs(dataset_root)
-    )
+def build_generator(get_config, suite, run_group, *, debug=False):
+    configs = list(ogbench_configs() if suite == "ogbench" else ocbench_configs())
     generator = SbatchGenerator(
         prefix=(
             "MUJOCO_GL=egl",
@@ -134,7 +121,6 @@ def write_launchers(get_config, run_group):
         description="Generate paper experiment commands without executing them."
     )
     parser.add_argument("--suite", choices=("ogbench", "ocbench", "all"), default="all")
-    parser.add_argument("--ocbench-data-dir", default=None)
     parser.add_argument(
         "--local",
         action="store_true",
@@ -155,7 +141,6 @@ def write_launchers(get_config, run_group):
             get_config,
             suite,
             group,
-            dataset_root=args.ocbench_data_dir,
             debug=args.debug,
         )
         render = generator.generate_local_str if args.local else generator.generate_str

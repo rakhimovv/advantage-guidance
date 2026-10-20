@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import glob
 import os
 
 import numpy as np
@@ -103,28 +102,20 @@ def make_ocbench_env(family, env_kwargs, nworld):
     return make_env(family, env_kwargs, nworld)
 
 
-def get_dataset_paths(dataset_dir, num_datasets=None):
-    """Return sorted training shards from an OCBench dataset directory."""
-    dataset_dir = os.path.expanduser(dataset_dir)
-    paths = sorted(
-        path
-        for path in glob.glob(os.path.join(dataset_dir, "*.npz"))
-        if not path.endswith("-val.npz")
+def get_dataset_paths(env_name, num_datasets=None):
+    """Download released shards into OCBench's default cache and return training paths."""
+    import ocbench
+
+    if num_datasets is not None and num_datasets < 1:
+        raise ValueError(f"ocbench_num_datasets must be positive, got {num_datasets}.")
+    paths, _ = ocbench.download_datasets(
+        canonical_ocbench_env_name(env_name),
+        num_shards=num_datasets,
     )
-    if not paths:
+    if num_datasets is not None and len(paths) < num_datasets:
         raise FileNotFoundError(
-            f"No OCBench .npz dataset shards found in {dataset_dir}."
+            f"Requested {num_datasets} OCBench shards for {env_name}, but found only {len(paths)}."
         )
-    if num_datasets is not None:
-        if num_datasets < 1:
-            raise ValueError(
-                f"ocbench_num_datasets must be positive, got {num_datasets}."
-            )
-        if len(paths) < num_datasets:
-            raise FileNotFoundError(
-                f"Requested {num_datasets} OCBench shards from {dataset_dir}, but found only {len(paths)}."
-            )
-        paths = paths[:num_datasets]
     return paths
 
 

@@ -1,0 +1,53 @@
+[project]
+name = "advantage-guidance"
+version = "0.1.0"
+description = "Reinforcement Learning via Advantage Guidance"
+requires-python = ">=3.11"
+dependencies = [
+    "absl-py==2.4.0",
+    "distrax==0.1.9",
+    "flax==0.12.7",
+    "gymnasium==0.29.1",
+    "jax[cuda12]==0.10.1",
+    "ml-collections==1.1.0",
+    "mujoco==3.9.0",
+    "mujoco-warp==3.9.0.1",
+    "numpy==2.4.6",
+    "ocbench[mjwarp]==1.0.2",
+    "ogbench==1.2.1",
+    "optax==0.2.8",
+    "pillow==12.2.0",
+    "pre-commit>=4.0",
+    "ruff==0.15.17",
+    "tqdm==4.68.1",
+    "tfp-nightly==0.26.0.dev20260617",
+    "typing-extensions==4.15.0",
+    "wandb==0.27.2",
+    "warp-lang==1.13.0",
+]
+
+[tool.uv]
+# Keep shared transitive dependencies aligned with the research lockfile.
+constraint-dependencies = [
+    "chex==0.1.92",
+    "click==8.4.1",
+    "filelock==3.32.2",
+    "fsspec==2026.6.0",
+    "hf-xet==1.6.0",
+    "huggingface-hub==1.21.0",
+    "msgpack==1.2.0",
+    "nvidia-nvshmem-cu12==3.7.0",
+    "orbax-checkpoint==0.12.0",
+    "packaging==26.2",
+    "prometheus-client==0.25.0",
+    "protobuf==7.35.1",
+    "simplejson==4.1.1",
+    "uvloop==0.22.1",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.format]
+quote-style = "double"

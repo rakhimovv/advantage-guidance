@@ -33,27 +33,23 @@ class CsvLogger:
         self.file = None
         self.disallowed_types = (wandb.Image, wandb.Video, wandb.Histogram)
 
+    def _is_logged(self, v):
+        # Non-scalar metrics would write multi-line cells and break the CSV.
+        return not isinstance(v, self.disallowed_types) and np.ndim(v) == 0
+
     def log(self, row, step):
         row["step"] = step
         if self.file is None:
             self.file = open(self.path, "w")
             if self.header is None:
-                self.header = [
-                    k
-                    for k, v in row.items()
-                    if not isinstance(v, self.disallowed_types)
-                ]
+                self.header = [k for k, v in row.items() if self._is_logged(v)]
                 self.file.write(",".join(self.header) + "\n")
-            filtered_row = {
-                k: v for k, v in row.items() if not isinstance(v, self.disallowed_types)
-            }
+            filtered_row = {k: v for k, v in row.items() if self._is_logged(v)}
             self.file.write(
                 ",".join([str(filtered_row.get(k, "")) for k in self.header]) + "\n"
             )
         else:
-            filtered_row = {
-                k: v for k, v in row.items() if not isinstance(v, self.disallowed_types)
-            }
+            filtered_row = {k: v for k, v in row.items() if self._is_logged(v)}
             self.file.write(
                 ",".join([str(filtered_row.get(k, "")) for k in self.header]) + "\n"
             )

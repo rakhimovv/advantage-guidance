@@ -99,7 +99,9 @@ def build_generator(get_config, suite, run_group, *, debug=False):
     )
     generator.add_common_prefix({"wandb_run_group": run_group})
     for config in configs[:1] if debug else configs:
-        config.update(get_config(suite, config["env_name"]))
+        agent_config = get_config(suite, config["env_name"])
+        # --agent must precede its --agent.* overrides on the command line.
+        config = {"agent": agent_config.pop("agent"), **config, **agent_config}
         if debug:
             config.update(
                 {
